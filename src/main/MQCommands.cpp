@@ -743,7 +743,7 @@ void SpellSlotInfo(PlayerClient* pChar, const char* szLine)
 // ***************************************************************************
 // Function:    MemSpell
 // Description: Our '/MemSpell' command
-// Usage:       /MemSpell gem# "spell name"
+// Usage:       /MemSpell gem# "spell name"|spellID
 // ***************************************************************************
 void MemSpell(PlayerClient* pChar, const char* szLine)
 {
@@ -766,13 +766,15 @@ void MemSpell(PlayerClient* pChar, const char* szLine)
 	char SpellName[MAX_STRING] = { 0 };
 	GetArg(SpellName, szLine, 2);
 
+	int SpellID = IsNumber(SpellName) ? GetIntFromString(SpellName, 0) : 0;
+
 	EQ_Spell* pSpell = nullptr;
 	for (int index = 0; index < NUM_BOOK_SLOTS; index++)
 	{
 		if (EQ_Spell* pTempSpell = GetSpellByID(pProfile->SpellBook[index]))
 		{
-			// exact name match only
-			if (ci_equals(pTempSpell->Name, SpellName))
+			// exact ID match if a spell ID was given, otherwise exact name match
+			if (SpellID > 0 ? pTempSpell->ID == SpellID : ci_equals(pTempSpell->Name, SpellName))
 			{
 				pSpell = pTempSpell;
 				break;
