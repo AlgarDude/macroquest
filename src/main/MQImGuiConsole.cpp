@@ -70,6 +70,7 @@ static bool s_consoleVisible = false;
 static bool s_consoleVisibleOnStartup = false;
 static bool s_resetConsolePosition = false;
 static bool s_setFocus = false;
+static bool s_focusConsoleRequested = false;
 static bool s_consolePersistentCommandHistory = false;
 
 class MQConsole;
@@ -868,6 +869,15 @@ void UpdateImGuiConsole()
 		}
 	}
 
+	if (s_focusConsoleRequested)
+	{
+		s_focusConsoleRequested = false;
+
+		s_consoleVisible = true;
+		s_setFocus = true;
+		shouldSetFocusToMainViewport = true;
+	}
+
 	if (s_consoleVisible)
 	{
 		if (s_setFocus)
@@ -993,6 +1003,12 @@ void UpdateImGuiConsole()
 	}
 }
 
+static void DoConsoleFocusBind(const char* name, bool down)
+{
+	if (!down)
+		s_focusConsoleRequested = true;
+}
+
 void MQConsoleCommand(SPAWNINFO* pChar, char* Line)
 {
 	char szCommand[MAX_STRING] = { 0 };
@@ -1089,6 +1105,7 @@ void InitializeImGuiConsole()
 
 	gMQConsole = new MQConsole();
 	AddCommand("/mqconsole", MQConsoleCommand);
+	AddMQ2KeyBind("MQCONSOLE", DoConsoleFocusBind);
 }
 
 void ShutdownImGuiConsole()
@@ -1103,6 +1120,7 @@ void ShutdownImGuiConsole()
 
 	RemoveSettingsPanel("Console");
 	RemoveCommand("/mqconsole");
+	RemoveMQ2KeyBind("MQCONSOLE");
 }
 
 DWORD ImGuiConsoleAddText(const char* line, DWORD color, DWORD filter)
